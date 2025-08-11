@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-a0d%@v=4u5nt^pv#$th3e!!76p5(v@*(u6uzrigxi1e63+ux^e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['swagprogramme.pythonanywhere.com']
-
+ALLOWED_HOSTS = ["swagprogramme.pythonanywhere.com", "127.0.0.1", "localhost"]
+CSRF_TRUSTED_ORIGINS = ["https://swagprogramme.pythonanywhere.com"]
 
 # Application definition
 
