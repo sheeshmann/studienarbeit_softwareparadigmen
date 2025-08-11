@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Anmelden</title></head>
+<body>
+  <h1>Anmeldefenster</h1>
+  <form method="post" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Anmelden</button>
+  </form>
+  {% if form.errors %}
+    <p>Benutzername oder Passwort falsch.</p>
+  {% endif %}
+</body>
+</html>
