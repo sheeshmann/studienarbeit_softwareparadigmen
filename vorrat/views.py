@@ -7,6 +7,9 @@ from .models import FoodItem
 from .serializers import FoodItemSerializer
 from .forms import FoodItemForm
 
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login as auth_login
+
 # API bleibt
 class FoodItemViewSet(viewsets.ModelViewSet):
     queryset = FoodItem.objects.all()
@@ -43,3 +46,14 @@ def food_add(request):
         form = FoodItemForm()
     return render(request, 'vorrat/food_form.html', {'form': form})
 
+def signup(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # optional: direkt einloggen, sonst auf login umleiten
+            # auth_login(request, user)
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', {'form': form})
