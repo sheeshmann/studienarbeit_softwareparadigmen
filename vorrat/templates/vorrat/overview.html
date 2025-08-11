@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head><title>Übersicht</title></head>
+<body>
+  <h1>Übersicht</h1>
+  <p><a href="{% url 'food-add' %}">Lebensmittel hinzufügen</a> |
+     <a href="{% url 'logout' %}">Abmelden</a></p>
+
+  <h2>Dein Vorrat</h2>
+
+  <h3>- MHD &gt; 7 Tage</h3>
+  <ul>
+    {% for f in mhd_gt_7 %}
+      <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
+    {% empty %}<li>–</li>{% endfor %}
+  </ul>
+
+  <h3>- MHD &lt; 7 Tage</h3>
+  <ul>
+    {% for f in mhd_lt_7 %}
+      <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
+    {% empty %}<li>–</li>{% endfor %}
+  </ul>
+
+  <h3>- MHD seit 3 Tagen überschritten</h3>
+  <ul>
+    {% for f in expired_0_3 %}
+      <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
+    {% empty %}<li>–</li>{% endfor %}
+  </ul>
+
+  <h3>- MHD über 3 Tage überschritten</h3>
+  <ul>
+    {% for f in expired_gt_3 %}
+      <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
+    {% empty %}<li>–</li>{% endfor %}
+  </ul>
+</body>
+</html>

@@ -1,7 +1,13 @@
-<h1>Neues Lebensmittel hinzufügen</h1>
-
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Speichern</button>
-</form>
+<!doctype html>
+<html>
+<head><title>Lebensmittel hinzufügen</title></head>
+<body>
+  <h1>Lebensmittel hinzufügen</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Hinzufügen</button>
+  </form>
+  <p><a href="{% url 'overview' %}">Zurück zur Übersicht</a></p>
+</body>
+</html>

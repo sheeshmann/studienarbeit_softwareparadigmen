@@ -26,4 +26,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)), 
     path('', include('vorrat.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
