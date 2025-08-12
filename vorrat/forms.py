@@ -8,4 +8,9 @@ class FoodItemForm(forms.ModelForm):
     )
     class Meta:
         model = FoodItem
-        fields = ['name', 'quantity', 'unit', 'expiration_date']
+        fields = ['name', 'quantity', 'expiration_date']
+        labels = {
+            'name': 'Name',
+            'quantity': 'Anzahl',
+            'expiration_date': 'Ablaufdatum',
+        }
