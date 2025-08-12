@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
 from rest_framework import viewsets
@@ -11,6 +11,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login as auth_login
 
 from rest_framework.permissions import IsAuthenticated
+
+from django.views.decorators.http import require_POST
 
 # API bleibt
 class FoodItemViewSet(viewsets.ModelViewSet):
@@ -65,3 +67,28 @@ def signup(request):
     else:
         form = UserCreationForm()
     return render(request, 'registration/signup.html', {'form': form})
+
+@require_POST
+@login_required
+def food_delete(request, pk):
+    item = get_object_or_404(FoodItem, pk=pk, user=request.user)
+    item.delete()
+    return redirect('overview')
+
+@require_POST
+@login_required
+def food_change_qty(request, pk, delta):
+    """delta ist z.B. -1 oder +1"""
+    item = get_object_or_404(FoodItem, pk=pk, user=request.user)
+    try:
+        delta = int(delta)
+    except ValueError:
+        return redirect('overview')
+
+    new_qty = (item.quantity or 0) + delta
+    if new_qty <= 0:
+        item.delete()          # bei 0 oder weniger: Eintrag entfernen
+    else:
+        item.quantity = new_qty
+        item.save()
+    return redirect('overview')
