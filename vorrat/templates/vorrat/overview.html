@@ -3,18 +3,32 @@
 <head>
   <title>Übersicht</title>
   <style>
-    /* Stellt sicher, dass der Button am unteren Ende bleibt */
     body {
+      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
     main {
-      flex: 1; /* Füllt den Platz, damit footer unten bleibt */
+      flex: 1;
     }
     footer {
       margin-top: auto;
       padding: 10px 0;
+    }
+    li {
+      margin-bottom: 5px;
+    }
+    a.button {
+      margin-left: 10px;
+      text-decoration: none;
+      background: #ddd;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    a.button:hover {
+      background: #ccc;
     }
   </style>
 </head>
@@ -26,34 +40,52 @@
     <h2>Dein Vorrat</h2>
 
     <h3>- MHD &gt; 7 Tage</h3>
-    <h3>- MHD &gt; 7 Tage</h3>
     <ul>
       {% for f in mhd_gt_7 %}
         <li>
           {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
-
-      <!-- -1 -->
-          <form method="post" action="{% url 'food-change-qty' f.id -1 %}" style="display:inline">
-            {% csrf_token %}
-            <button type="submit">−1</button>
-          </form>
-
-      <!-- +1 -->
-          <form method="post" action="{% url 'food-change-qty' f.id 1 %}" style="display:inline">
-            {% csrf_token %}
-            <button type="submit">+1</button>
-          </form>
-
-          <!-- löschen -->
-          <form method="post" action="{% url 'food-delete' f.id %}" style="display:inline"
-                onsubmit="return confirm('Wirklich löschen?');">
-            {% csrf_token %}
-            <button type="submit">Löschen</button>
-          </form>
+          <a href="{% url 'food-change-qty' f.id -1 %}" class="button">-1</a>
+          <a href="{% url 'food-change-qty' f.id 1 %}" class="button">+1</a>
+          <a href="{% url 'food-delete' f.id %}" class="button" style="color:red;">Löschen</a>
         </li>
       {% empty %}<li>–</li>{% endfor %}
-  </ul>
+    </ul>
 
+    <h3>- MHD &lt; 7 Tage</h3>
+    <ul>
+      {% for f in mhd_lt_7 %}
+        <li>
+          {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
+          <a href="{% url 'food-change-qty' f.id -1 %}" class="button">-1</a>
+          <a href="{% url 'food-change-qty' f.id 1 %}" class="button">+1</a>
+          <a href="{% url 'food-delete' f.id %}" class="button" style="color:red;">Löschen</a>
+        </li>
+      {% empty %}<li>–</li>{% endfor %}
+    </ul>
+
+    <h3>- MHD seit 3 Tagen überschritten</h3>
+    <ul>
+      {% for f in expired_0_3 %}
+        <li>
+          {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
+          <a href="{% url 'food-change-qty' f.id -1 %}" class="button">-1</a>
+          <a href="{% url 'food-change-qty' f.id 1 %}" class="button">+1</a>
+          <a href="{% url 'food-delete' f.id %}" class="button" style="color:red;">Löschen</a>
+        </li>
+      {% empty %}<li>–</li>{% endfor %}
+    </ul>
+
+    <h3>- MHD über 3 Tage überschritten</h3>
+    <ul>
+      {% for f in expired_gt_3 %}
+        <li>
+          {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
+          <a href="{% url 'food-change-qty' f.id -1 %}" class="button">-1</a>
+          <a href="{% url 'food-change-qty' f.id 1 %}" class="button">+1</a>
+          <a href="{% url 'food-delete' f.id %}" class="button" style="color:red;">Löschen</a>
+        </li>
+      {% empty %}<li>–</li>{% endfor %}
+    </ul>
   </main>
 
   <footer>
