@@ -3,6 +3,7 @@ from .models import FoodItem
 
 class FoodItemForm(forms.ModelForm):
     expiration_date = forms.DateField(
+        label='Mindesthaltbarkeitsdatum', 
         input_formats=['%d.%m.%Y', '%Y-%m-%d'],
         widget=forms.DateInput(attrs={'type': 'date'})
     )
@@ -12,5 +13,4 @@ class FoodItemForm(forms.ModelForm):
         labels = {
             'name': 'Name',
             'quantity': 'Anzahl',
-            'expiration_date': 'Mindesthaltbarkeitsdatum'
         }
