@@ -1,13 +1,29 @@
 <!doctype html>
 <html>
-<head><title>Übersicht</title></head>
+<head>
+  <title>Übersicht</title>
+  <style>
+    /* Positioniert den Abmeldebutton immer rechts unten */
+    .logout-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #f44336; /* Rot */
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .logout-btn:hover {
+      background-color: #d32f2f;
+    }
+  </style>
+</head>
 <body>
   <h1>Übersicht</h1>
-  <p><a href="{% url 'food-add' %}">Lebensmittel hinzufügen</a> |
-     <form method="post" action="{% url 'logout' %}" style="display:inline">
-       {% csrf_token %}
-       <button type="submit">Abmelden</button>
-     </form>
+  <p><a href="{% url 'food-add' %}">Lebensmittel hinzufügen</a></p>
 
   <h2>Dein Vorrat</h2>
 
@@ -38,5 +54,11 @@
       <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
     {% empty %}<li>–</li>{% endfor %}
   </ul>
+
+  <!-- Abmeldebutton unten rechts -->
+  <form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit" class="logout-btn">Abmelden</button>
+  </form>
 </body>
 </html>
