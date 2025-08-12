@@ -5,6 +5,6 @@ urlpatterns = [
     path('', overview, name='overview'),
     path('add/', food_add, name='food-add'),
     path('item/<int:pk>/delete/', food_delete, name='food-delete'),
-    path('item/<int:pk>/change/<int:delta>/', food_change_qty, name='food-change-qty'),
+    path('item/<int:pk>/change/<str:delta>/', food_change_qty, name='food-change-qty'),
     path('accounts/signup/', signup, name='signup'),
 ]
