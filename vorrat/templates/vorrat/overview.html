@@ -4,7 +4,6 @@
   <title>Übersicht</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
@@ -16,19 +15,8 @@
       margin-top: auto;
       padding: 10px 0;
     }
-    li {
-      margin-bottom: 5px;
-    }
-    a.button {
-      margin-left: 10px;
-      text-decoration: none;
-      background: #ddd;
-      padding: 2px 5px;
-      border-radius: 3px;
-      font-size: 0.9em;
-    }
-    a.button:hover {
-      background: #ccc;
+    form.inline {
+      display: inline;
     }
   </style>
 </head>
@@ -44,9 +32,19 @@
       {% for f in mhd_gt_7 %}
         <li>
           {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
-          <a href="{% url 'food-change-qty' f.id -1 %}" class="button">-1</a>
-          <a href="{% url 'food-change-qty' f.id 1 %}" class="button">+1</a>
-          <a href="{% url 'food-delete' f.id %}" class="button" style="color:red;">Löschen</a>
+          <form method="post" action="{% url 'food-change-qty' f.id '-1' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit">−1</button>
+          </form>
+          <form method="post" action="{% url 'food-change-qty' f.id '1' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit">+1</button>
+          </form>
+          <form method="post" action="{% url 'food-delete' f.id %}" class="inline"
+                onsubmit="return confirm('Wirklich löschen?');">
+            {% csrf_token %}
+            <button type="submit" style="color:red">Löschen</button>
+          </form>
         </li>
       {% empty %}<li>–</li>{% endfor %}
     </ul>
@@ -56,9 +54,19 @@
       {% for f in mhd_lt_7 %}
         <li>
           {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
-          <a href="{% url 'food-change-qty' f.id -1 %}" class="button">-1</a>
-          <a href="{% url 'food-change-qty' f.id 1 %}" class="button">+1</a>
-          <a href="{% url 'food-delete' f.id %}" class="button" style="color:red;">Löschen</a>
+          <form method="post" action="{% url 'food-change-qty' f.id '-1' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit">−1</button>
+          </form>
+          <form method="post" action="{% url 'food-change-qty' f.id '1' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit">+1</button>
+          </form>
+          <form method="post" action="{% url 'food-delete' f.id %}" class="inline"
+                onsubmit="return confirm('Wirklich löschen?');">
+            {% csrf_token %}
+            <button type="submit" style="color:red">Löschen</button>
+          </form>
         </li>
       {% empty %}<li>–</li>{% endfor %}
     </ul>
@@ -68,9 +76,19 @@
       {% for f in expired_0_3 %}
         <li>
           {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
-          <a href="{% url 'food-change-qty' f.id -1 %}" class="button">-1</a>
-          <a href="{% url 'food-change-qty' f.id 1 %}" class="button">+1</a>
-          <a href="{% url 'food-delete' f.id %}" class="button" style="color:red;">Löschen</a>
+          <form method="post" action="{% url 'food-change-qty' f.id '-1' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit">−1</button>
+          </form>
+          <form method="post" action="{% url 'food-change-qty' f.id '1' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit">+1</button>
+          </form>
+          <form method="post" action="{% url 'food-delete' f.id %}" class="inline"
+                onsubmit="return confirm('Wirklich löschen?');">
+            {% csrf_token %}
+            <button type="submit" style="color:red">Löschen</button>
+          </form>
         </li>
       {% empty %}<li>–</li>{% endfor %}
     </ul>
@@ -80,9 +98,19 @@
       {% for f in expired_gt_3 %}
         <li>
           {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
-          <a href="{% url 'food-change-qty' f.id -1 %}" class="button">-1</a>
-          <a href="{% url 'food-change-qty' f.id 1 %}" class="button">+1</a>
-          <a href="{% url 'food-delete' f.id %}" class="button" style="color:red;">Löschen</a>
+          <form method="post" action="{% url 'food-change-qty' f.id '-1' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit">−1</button>
+          </form>
+          <form method="post" action="{% url 'food-change-qty' f.id '1' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit">+1</button>
+          </form>
+          <form method="post" action="{% url 'food-delete' f.id %}" class="inline"
+                onsubmit="return confirm('Wirklich löschen?');">
+            {% csrf_token %}
+            <button type="submit" style="color:red">Löschen</button>
+          </form>
         </li>
       {% empty %}<li>–</li>{% endfor %}
     </ul>
