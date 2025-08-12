@@ -20,7 +20,7 @@ from rest_framework.routers import DefaultRouter
 from vorrat.views import FoodItemViewSet
 
 router = DefaultRouter()
-router.register(r'food', FoodItemViewSet)
+router.register(r'food', FoodItemViewSet, basename='food')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
