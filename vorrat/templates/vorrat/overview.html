@@ -3,62 +3,62 @@
 <head>
   <title>Übersicht</title>
   <style>
-    /* Positioniert den Abmeldebutton immer rechts unten */
-    .logout-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #f44336; /* Rot */
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
+    /* Stellt sicher, dass der Button am unteren Ende bleibt */
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
-    .logout-btn:hover {
-      background-color: #d32f2f;
+    main {
+      flex: 1; /* Füllt den Platz, damit footer unten bleibt */
+    }
+    footer {
+      margin-top: auto;
+      padding: 10px 0;
     }
   </style>
 </head>
 <body>
-  <h1>Übersicht</h1>
-  <p><a href="{% url 'food-add' %}">Lebensmittel hinzufügen</a></p>
+  <main>
+    <h1>Übersicht</h1>
+    <p><a href="{% url 'food-add' %}">Lebensmittel hinzufügen</a></p>
 
-  <h2>Dein Vorrat</h2>
+    <h2>Dein Vorrat</h2>
 
-  <h3>- MHD &gt; 7 Tage</h3>
-  <ul>
-    {% for f in mhd_gt_7 %}
-      <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
-    {% empty %}<li>–</li>{% endfor %}
-  </ul>
+    <h3>- MHD &gt; 7 Tage</h3>
+    <ul>
+      {% for f in mhd_gt_7 %}
+        <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
+      {% empty %}<li>–</li>{% endfor %}
+    </ul>
 
-  <h3>- MHD &lt; 7 Tage</h3>
-  <ul>
-    {% for f in mhd_lt_7 %}
-      <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
-    {% empty %}<li>–</li>{% endfor %}
-  </ul>
+    <h3>- MHD &lt; 7 Tage</h3>
+    <ul>
+      {% for f in mhd_lt_7 %}
+        <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
+      {% empty %}<li>–</li>{% endfor %}
+    </ul>
 
-  <h3>- MHD seit 3 Tagen überschritten</h3>
-  <ul>
-    {% for f in expired_0_3 %}
-      <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
-    {% empty %}<li>–</li>{% endfor %}
-  </ul>
+    <h3>- MHD seit 3 Tagen überschritten</h3>
+    <ul>
+      {% for f in expired_0_3 %}
+        <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
+      {% empty %}<li>–</li>{% endfor %}
+    </ul>
 
-  <h3>- MHD über 3 Tage überschritten</h3>
-  <ul>
-    {% for f in expired_gt_3 %}
-      <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
-    {% empty %}<li>–</li>{% endfor %}
-  </ul>
+    <h3>- MHD über 3 Tage überschritten</h3>
+    <ul>
+      {% for f in expired_gt_3 %}
+        <li>{{ f.name }} – {{ f.quantity }} {{ f.unit }} – Ablauf: {{ f.expiration_date }}</li>
+      {% empty %}<li>–</li>{% endfor %}
+    </ul>
+  </main>
 
-  <!-- Abmeldebutton unten rechts -->
-  <form method="post" action="{% url 'logout' %}">
-    {% csrf_token %}
-    <button type="submit" class="logout-btn">Abmelden</button>
-  </form>
+  <footer>
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit">Abmelden</button>
+    </form>
+  </footer>
 </body>
 </html>
