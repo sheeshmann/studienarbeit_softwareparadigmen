@@ -4,7 +4,10 @@
 <body>
   <h1>Übersicht</h1>
   <p><a href="{% url 'food-add' %}">Lebensmittel hinzufügen</a> |
-     <a href="{% url 'logout' %}">Abmelden</a></p>
+     <form method="post" action="{% url 'logout' %}" style="display:inline">
+       {% csrf_token %}
+       <button type="submit">Abmelden</button>
+     </form>
 
   <h2>Dein Vorrat</h2>
 
