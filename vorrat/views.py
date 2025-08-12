@@ -11,10 +11,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login as auth_login
 
 from rest_framework.permissions import IsAuthenticated
-
 from django.views.decorators.http import require_POST
 
-# API bleibt
 class FoodItemViewSet(viewsets.ModelViewSet):
     serializer_class = FoodItemSerializer
     permission_classes = [IsAuthenticated]  # API nur für eingeloggte Nutzer
@@ -72,8 +70,12 @@ def signup(request):
 @login_required
 def food_delete(request, pk):
     item = get_object_or_404(FoodItem, pk=pk, user=request.user)
+    chosen_action = request.session.get(f"choice_{item.id}")
+    if chosen_action:
+        update_reward(request.user, item, chosen_action)
     item.delete()
     return redirect('overview')
+
 
 @require_POST
 @login_required
@@ -92,3 +94,80 @@ def food_change_qty(request, pk, delta):
         item.quantity = new_qty
         item.save()
     return redirect('overview')
+
+
+from .rl import bin_days, choose_action
+from .models import BanditBucket
+from datetime import date
+
+def advice_for_item(user, item):
+    days = (item.expiration_date - date.today()).days
+    days_bucket = bin_days(days)
+    bucket, _ = BanditBucket.objects.get_or_create(
+        user=user, days_bin=days_bucket, category=''  # oder item.category falls vorhanden
+    )
+    action = choose_action(bucket)
+    badge = "Unsicherheit" if action == 'warn' else "Sicherheit"
+    return badge, bucket, action
+
+from django.utils import timezone
+
+def update_reward(user, item, chosen_action):
+    from .models import BanditBucket
+    from .rl import bin_days
+    days_bucket = bin_days((item.expiration_date - item.added_on.date()).days)  # oder days_to_expiry zum Entscheidzeitpunkt, wenn gespeichert
+    bucket = BanditBucket.objects.get(user=user, days_bin=days_bucket, category='')
+    expired = (timezone.now().date() >= item.expiration_date)
+    correct = (chosen_action == 'warn' and expired) or (chosen_action == 'no_warn' and not expired)
+    if chosen_action == 'warn':
+        if correct:
+            bucket.warn_alpha += 1
+        else:
+            bucket.warn_beta += 1
+    else:
+        if correct:
+            bucket.nowarn_alpha += 1
+        else:
+            bucket.nowarn_beta += 1
+    bucket.save()
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from datetime import date
+from .models import FoodItem
+from .rl import advice_for_item  # deine RL-Funktion importieren
+
+@login_required
+def overview(request):
+    # Items des eingeloggten Nutzers holen
+    all_items = FoodItem.objects.filter(user=request.user).order_by('expiration_date')
+
+    # Kategorien nach MHD
+    mhd_gt_7 = []
+    mhd_lt_7 = []
+    expired_0_3 = []
+    expired_gt_3 = []
+
+    for item in all_items:
+        # RL Badge setzen
+        badge, _, _ = advice_for_item(request.user, item)
+        item.badge = badge  # Attribut für Template
+
+        days_to_expiry = (item.expiration_date - date.today()).days
+        if days_to_expiry > 7:
+            mhd_gt_7.append(item)
+        elif 0 < days_to_expiry <= 7:
+            mhd_lt_7.append(item)
+        elif -3 <= days_to_expiry <= 0:
+            expired_0_3.append(item)
+        else:
+            expired_gt_3.append(item)
+
+    return render(request, 'vorrat/overview.html', {
+        'mhd_gt_7': mhd_gt_7,
+        'mhd_lt_7': mhd_lt_7,
+        'expired_0_3': expired_0_3,
+        'expired_gt_3': expired_gt_3,
+    })
+

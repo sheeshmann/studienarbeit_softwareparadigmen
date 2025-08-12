@@ -7,17 +7,30 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      font-family: Arial, sans-serif;
     }
-    main {
-      flex: 1;
+    main { flex: 1; }
+    footer { margin-top: auto; padding: 10px 0; }
+
+    ul { padding-left: 18px; }
+    li { margin-bottom: 6px; }
+
+    /* kleine Badges für RL-Status */
+    .badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1;
+      background: #eee;
     }
-    footer {
-      margin-top: auto;
-      padding: 10px 0;
-    }
-    form.inline {
-      display: inline;
-    }
+    .badge.unsicherheit { background: #ffe3e3; } /* rötlich */
+    .badge.sicherheit   { background: #e6ffe6; } /* grünlich */
+
+    /* Inline-Formulare für Buttons */
+    form.inline { display: inline; margin-left: 6px; }
+    form.inline button { padding: 2px 6px; }
   </style>
 </head>
 <body>
@@ -32,18 +45,18 @@
       {% for f in mhd_gt_7 %}
         <li>
           {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
+          {% if f.badge %}
+            <span class="badge {{ f.badge|lower }}">{{ f.badge }}</span>
+          {% endif %}
           <form method="post" action="{% url 'food-change-qty' f.id '-1' %}" class="inline">
-            {% csrf_token %}
-            <button type="submit">−1</button>
+            {% csrf_token %}<button type="submit">−1</button>
           </form>
           <form method="post" action="{% url 'food-change-qty' f.id '1' %}" class="inline">
-            {% csrf_token %}
-            <button type="submit">+1</button>
+            {% csrf_token %}<button type="submit">+1</button>
           </form>
           <form method="post" action="{% url 'food-delete' f.id %}" class="inline"
                 onsubmit="return confirm('Wirklich löschen?');">
-            {% csrf_token %}
-            <button type="submit" style="color:red">Löschen</button>
+            {% csrf_token %}<button type="submit" style="color:red">Löschen</button>
           </form>
         </li>
       {% empty %}<li>–</li>{% endfor %}
@@ -54,18 +67,18 @@
       {% for f in mhd_lt_7 %}
         <li>
           {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
+          {% if f.badge %}
+            <span class="badge {{ f.badge|lower }}">{{ f.badge }}</span>
+          {% endif %}
           <form method="post" action="{% url 'food-change-qty' f.id '-1' %}" class="inline">
-            {% csrf_token %}
-            <button type="submit">−1</button>
+            {% csrf_token %}<button type="submit">−1</button>
           </form>
           <form method="post" action="{% url 'food-change-qty' f.id '1' %}" class="inline">
-            {% csrf_token %}
-            <button type="submit">+1</button>
+            {% csrf_token %}<button type="submit">+1</button>
           </form>
           <form method="post" action="{% url 'food-delete' f.id %}" class="inline"
                 onsubmit="return confirm('Wirklich löschen?');">
-            {% csrf_token %}
-            <button type="submit" style="color:red">Löschen</button>
+            {% csrf_token %}<button type="submit" style="color:red">Löschen</button>
           </form>
         </li>
       {% empty %}<li>–</li>{% endfor %}
@@ -76,18 +89,18 @@
       {% for f in expired_0_3 %}
         <li>
           {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
+          {% if f.badge %}
+            <span class="badge {{ f.badge|lower }}">{{ f.badge }}</span>
+          {% endif %}
           <form method="post" action="{% url 'food-change-qty' f.id '-1' %}" class="inline">
-            {% csrf_token %}
-            <button type="submit">−1</button>
+            {% csrf_token %}<button type="submit">−1</button>
           </form>
           <form method="post" action="{% url 'food-change-qty' f.id '1' %}" class="inline">
-            {% csrf_token %}
-            <button type="submit">+1</button>
+            {% csrf_token %}<button type="submit">+1</button>
           </form>
           <form method="post" action="{% url 'food-delete' f.id %}" class="inline"
                 onsubmit="return confirm('Wirklich löschen?');">
-            {% csrf_token %}
-            <button type="submit" style="color:red">Löschen</button>
+            {% csrf_token %}<button type="submit" style="color:red">Löschen</button>
           </form>
         </li>
       {% empty %}<li>–</li>{% endfor %}
@@ -98,18 +111,18 @@
       {% for f in expired_gt_3 %}
         <li>
           {{ f.name }} – {{ f.quantity }} – Ablauf: {{ f.expiration_date }}
+          {% if f.badge %}
+            <span class="badge {{ f.badge|lower }}">{{ f.badge }}</span>
+          {% endif %}
           <form method="post" action="{% url 'food-change-qty' f.id '-1' %}" class="inline">
-            {% csrf_token %}
-            <button type="submit">−1</button>
+            {% csrf_token %}<button type="submit">−1</button>
           </form>
           <form method="post" action="{% url 'food-change-qty' f.id '1' %}" class="inline">
-            {% csrf_token %}
-            <button type="submit">+1</button>
+            {% csrf_token %}<button type="submit">+1</button>
           </form>
           <form method="post" action="{% url 'food-delete' f.id %}" class="inline"
                 onsubmit="return confirm('Wirklich löschen?');">
-            {% csrf_token %}
-            <button type="submit" style="color:red">Löschen</button>
+            {% csrf_token %}<button type="submit" style="color:red">Löschen</button>
           </form>
         </li>
       {% empty %}<li>–</li>{% endfor %}
@@ -118,8 +131,7 @@
 
   <footer>
     <form method="post" action="{% url 'logout' %}">
-      {% csrf_token %}
-      <button type="submit">Abmelden</button>
+      {% csrf_token %}<button type="submit">Abmelden</button>
     </form>
   </footer>
 </body>
