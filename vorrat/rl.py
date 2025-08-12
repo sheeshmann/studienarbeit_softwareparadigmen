@@ -22,7 +22,11 @@ def sample_beta(a: float, b: float) -> float:
     y = random.gammavariate(b, 1.0)
     return x / (x + y)
 
-def choose_action(bucket) -> str:  # type: (BanditBucket) -> str  # optionaler Hint für Linter
-    theta_warn   = sample_beta(bucket.warn_alpha,  bucket.warn_beta)
+def choose_action(bucket: BanditBucket):
+    # Falls der Bucket noch keine Erfahrungswerte hat → Standard "no_warn" (Sicherheit)
+    if (bucket.warn_alpha, bucket.warn_beta, bucket.nowarn_alpha, bucket.nowarn_beta) == (1, 1, 1, 1):
+        return 'no_warn'
+
+    theta_warn = sample_beta(bucket.warn_alpha, bucket.warn_beta)
     theta_nowarn = sample_beta(bucket.nowarn_alpha, bucket.nowarn_beta)
-    return "warn" if theta_warn >= theta_nowarn else "no_warn"
+    return 'warn' if theta_warn >= theta_nowarn else 'no_warn'
