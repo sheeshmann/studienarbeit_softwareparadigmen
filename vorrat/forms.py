@@ -12,5 +12,5 @@ class FoodItemForm(forms.ModelForm):
         labels = {
             'name': 'Name',
             'quantity': 'Anzahl',
-            'expiration_date': 'Ablaufdatum',
+            'expiration_date': 'Mindesthaltbarkeitsdatum'
         }
