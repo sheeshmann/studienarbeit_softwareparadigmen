@@ -10,10 +10,18 @@ from .forms import FoodItemForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login as auth_login
 
+from rest_framework.permissions import IsAuthenticated
+
 # API bleibt
 class FoodItemViewSet(viewsets.ModelViewSet):
-    queryset = FoodItem.objects.all()
     serializer_class = FoodItemSerializer
+    permission_classes = [IsAuthenticated]  # API nur für eingeloggte Nutzer
+
+    def get_queryset(self):
+        return FoodItem.objects.filter(user=self.request.user).order_by('expiration_date')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 @login_required
 def overview(request):
@@ -21,26 +29,27 @@ def overview(request):
     in_7 = today + timedelta(days=7)
     three_days_ago = today - timedelta(days=3)
 
-    # Kategorien bauen
-    mhd_gt_7      = FoodItem.objects.filter(expiration_date__gt=in_7).order_by('expiration_date')
-    mhd_lt_7      = FoodItem.objects.filter(expiration_date__gt=today, expiration_date__lte=in_7).order_by('expiration_date')
-    expired_0_3   = FoodItem.objects.filter(expiration_date__gt=three_days_ago, expiration_date__lte=today).order_by('expiration_date')
-    expired_gt_3  = FoodItem.objects.filter(expiration_date__lte=three_days_ago).order_by('expiration_date')
+    qs = FoodItem.objects.filter(user=request.user)
+    mhd_gt_7     = qs.filter(expiration_date__gt=in_7).order_by('expiration_date')
+    mhd_lt_7     = qs.filter(expiration_date__gt=today, expiration_date__lte=in_7).order_by('expiration_date')
+    expired_0_3  = qs.filter(expiration_date__gt=three_days_ago, expiration_date__lte=today).order_by('expiration_date')
+    expired_gt_3 = qs.filter(expiration_date__lte=three_days_ago).order_by('expiration_date')
 
-    ctx = {
+    return render(request, 'vorrat/overview.html', {
         'mhd_gt_7': mhd_gt_7,
         'mhd_lt_7': mhd_lt_7,
         'expired_0_3': expired_0_3,
         'expired_gt_3': expired_gt_3,
-    }
-    return render(request, 'vorrat/overview.html', ctx)
+    })
 
 @login_required
 def food_add(request):
     if request.method == 'POST':
         form = FoodItemForm(request.POST)
         if form.is_valid():
-            form.save()
+            item = form.save(commit=False)
+            item.user = request.user        # <- Besitzer setzen
+            item.save()
             return redirect('overview')
     else:
         form = FoodItemForm()
