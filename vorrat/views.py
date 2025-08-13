@@ -1,17 +1,17 @@
-from datetime import date, timedelta
+from datetime import date
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 
-# DRF (falls du die API nutzt)
+# DRF (optional)
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from .models import FoodItem, BanditBucket
+from .models import FoodItem, ItemStat
 from .serializers import FoodItemSerializer
 from .forms import FoodItemForm
-from .rl import bin_days, choose_action
+from .rl import normalize_name, choose_action_for_stat
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login as auth_login
 
@@ -29,43 +29,35 @@ class FoodItemViewSet(viewsets.ModelViewSet):
 
 
 # -------------------------
-# RL-Helfer
+# RL-Helfer (pro Name & User)
 # -------------------------
 def advice_for_item(user, item):
-    """Ermittelt Badge (Sicherheit/Unsicherheit) und merkt die gewählte Aktion für Rewards."""
-    days = (item.expiration_date - date.today()).days
-    days_bucket = bin_days(days)
-    bucket, _ = BanditBucket.objects.get_or_create(
-        user=user, days_bin=days_bucket, category=''  # falls du Kategorien hast, hier einsetzen
-    )
-    action = choose_action(bucket)  # 'warn' oder 'no_warn'
-    badge = "Unsicherheit" if action == 'warn' else "Sicherheit"
+    """
+    Liefert ('Sicherheit'/'Unsicherheit') und die intern gewählte Aktion ('no_warn'/'warn')
+    auf Basis der pro-Name-Statistik für diesen User.
+    """
+    norm_name = normalize_name(item.name)
+    stat, _ = ItemStat.objects.get_or_create(user=user, name=norm_name)
+    action = choose_action_for_stat(stat.success, stat.failure)  # 'no_warn' oder 'warn'
+    badge = "Sicherheit" if action == 'no_warn' else "Unsicherheit"
     return badge, action
 
 
 def update_reward(user, item, chosen_action):
     """
-    Feedback: War die gewählte Aktion korrekt?
-    - 'warn' ist korrekt, wenn LM ablief
-    - 'no_warn' ist korrekt, wenn LM NICHT ablief
+    Feedback beim Verbrauch/Löschen:
+    - Wenn das Item abgelaufen ist -> failure++
+    - Wenn NICHT abgelaufen -> success++
     """
-    days_bucket = bin_days((item.expiration_date - item.added_on.date()).days)
-    bucket = BanditBucket.objects.get(user=user, days_bin=days_bucket, category='')
+    norm_name = normalize_name(item.name)
+    stat = ItemStat.objects.get(user=user, name=norm_name)
 
     expired = (timezone.now().date() >= item.expiration_date)
-    correct = (chosen_action == 'warn' and expired) or (chosen_action == 'no_warn' and not expired)
-
-    if chosen_action == 'warn':
-        if correct:
-            bucket.warn_alpha += 1
-        else:
-            bucket.warn_beta += 1
+    if expired:
+        stat.failure += 1
     else:
-        if correct:
-            bucket.nowarn_alpha += 1
-        else:
-            bucket.nowarn_beta += 1
-    bucket.save()
+        stat.success += 1
+    stat.save()
 
 
 # -------------------------
@@ -73,18 +65,14 @@ def update_reward(user, item, chosen_action):
 # -------------------------
 @login_required
 def overview(request):
-    """Liste nach MHD-Kategorien, inkl. RL-Badge und Session-Merken der Aktion je Item."""
+    """Liste nach MHD-Kategorien, inkl. pro-Name Badge und Session-Merken der Aktion je Item."""
     all_items = FoodItem.objects.filter(user=request.user).order_by('expiration_date')
 
-    mhd_gt_7 = []
-    mhd_lt_7 = []
-    expired_0_3 = []
-    expired_gt_3 = []
-
+    mhd_gt_7, mhd_lt_7, expired_0_3, expired_gt_3 = [], [], [], []
     today = date.today()
 
     for item in all_items:
-        # RL-Badge + Aktion bestimmen
+        # RL-Badge + Aktion bestimmen (pro Name & User)
         badge, action = advice_for_item(request.user, item)
         item.badge = badge
         # Aktion für Reward-Update merken
@@ -116,6 +104,12 @@ def food_add(request):
             item = form.save(commit=False)
             item.user = request.user
             item.save()
+
+            # Cold-start sicherstellen (Stat existiert):
+            ItemStat.objects.get_or_create(
+                user=request.user,
+                name=normalize_name(item.name),
+            )
             return redirect('overview')
     else:
         form = FoodItemForm()
@@ -139,9 +133,9 @@ def signup(request):
 @login_required
 def food_delete(request, pk):
     item = get_object_or_404(FoodItem, pk=pk, user=request.user)
-    chosen_action = request.session.pop(f"choice_{item.id}", None)
-    if chosen_action:
-        update_reward(request.user, item, chosen_action)
+    # Die angezeigte Aktion war nur UI; Reward hängt vom Outcome ab:
+    _ = request.session.pop(f"choice_{item.id}", None)
+    update_reward(request.user, item, _)
     item.delete()
     return redirect('overview')
 
@@ -149,6 +143,7 @@ def food_delete(request, pk):
 @require_POST
 @login_required
 def food_change_qty(request, pk, delta):
+    """delta ist z.B. -1 oder +1. Wenn Menge <= 0 -> als 'verbraucht' werten."""
     item = get_object_or_404(FoodItem, pk=pk, user=request.user)
     try:
         delta = int(delta)
@@ -157,10 +152,8 @@ def food_change_qty(request, pk, delta):
 
     new_qty = (item.quantity or 0) + delta
     if new_qty <= 0:
-        # als "verbraucht" interpretieren -> Reward aktualisieren
-        chosen_action = request.session.pop(f"choice_{item.id}", None)
-        if chosen_action:
-            update_reward(request.user, item, chosen_action)
+        _ = request.session.pop(f"choice_{item.id}", None)
+        update_reward(request.user, item, _)
         item.delete()
     else:
         item.quantity = new_qty
