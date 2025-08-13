@@ -46,11 +46,11 @@ def advice_for_item(user, item):
 def update_reward(user, item, chosen_action):
     """
     Feedback beim Verbrauch/Löschen:
-    - Wenn das Item abgelaufen ist -> failure++
-    - Wenn NICHT abgelaufen -> success++
+    - abgelaufen -> failure++
+    - NICHT abgelaufen -> success++
     """
     norm_name = normalize_name(item.name)
-    stat = ItemStat.objects.get(user=user, name=norm_name)
+    stat, _ = ItemStat.objects.get_or_create(user=user, name=norm_name)
 
     expired = (timezone.now().date() >= item.expiration_date)
     if expired:
@@ -58,6 +58,7 @@ def update_reward(user, item, chosen_action):
     else:
         stat.success += 1
     stat.save()
+
 
 
 # -------------------------

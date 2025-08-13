@@ -11,26 +11,10 @@ class FoodItem(models.Model):
     def __str__(self):
         return self.name
     
-class BanditBucket(models.Model):
-    # Beispiel-Bucket: days_to_expiry_bin + optional category + user-specific
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)  # personalisiert? sonst None
-    days_bin = models.CharField(max_length=20)    # e.g. "0-2", "3-6", "7-14", ">14"
-    category = models.CharField(max_length=50, blank=True)  # falls du Kategorien hast
-
-    # Beta-Parameter für jede Aktion
-    warn_alpha  = models.FloatField(default=1.0)
-    warn_beta   = models.FloatField(default=1.0)
-    nowarn_alpha = models.FloatField(default=1.0)
-    nowarn_beta  = models.FloatField(default=1.0)
-
-    class Meta:
-        unique_together = ('user', 'days_bin', 'category')
-
-
 class ItemStat(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     # exakt der im Formular eingegebene Name; wir normalisieren zusätzlich in Code
-    name = models.CharField(max_length=120)
+    name = models.CharField(max_length=120, db_index=True))
 
     # Beta(1,1) Prior -> wir speichern Zähler
     success = models.PositiveIntegerField(default=0)  # verbraucht vor MHD
@@ -38,6 +22,8 @@ class ItemStat(models.Model):
 
     class Meta:
         unique_together = ('user', 'name')
+        indexes = [
+            models.Index(fields=['user', 'name']), 
 
     def __str__(self):
         return f"{self.user.username}:{self.name} (S={self.success}/F={self.failure})"
