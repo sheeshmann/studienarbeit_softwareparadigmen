@@ -127,12 +127,27 @@
         </li>
       {% empty %}<li>–</li>{% endfor %}
     </ul>
-  </main>
 
-  <footer>
-    <form method="post" action="{% url 'logout' %}">
+    <p style="margin-top: 20px;">
+      In dieser Übersicht ist dein Vorrat nach dem Ablauf des Mindesthaltbarkeitsdatums sortiert.
+      Weiterhin kannst du über die Buttons rechts den Verbrauch der Lebensmittel steuern.
+      Solltest du ein Lebensmittel komplett verbraucht haben, kannst du es löschen. Kaufst du ein Lebensmittel
+      mit dem gleichen MHD ein, wie es sich bereits im Vorrat befindet, kannst du es einfach über +1 hinzufügen.
+      Weiterhin kannst du mit −1 den Verbrauch genauer steuern.
+    </p>
+
+    <p>
+      Eine weitere Anzeige sind <strong>Unsicherheit</strong> und <strong>Sicherheit</strong>.
+      Diese sind ein Informationsfeld und können nicht angeklickt werden. Die Information dahinter zeigt dir
+      dein bisheriges Verbrauchsverhalten im Rahmen des Mindesthaltbarkeitsdatums.
+      <em>Unsicherheit</em> bedeutet, dass du dieses Produkt in der Vergangenheit eher nach Ablauf
+      des MHDs konsumiert hast. <em>Sicherheit</em> bedeutet, dass du es überwiegend vor Ablauf des MHDs
+      konsumiert hast.
+    </p>
+
+    <form method="post" action="{% url 'logout' %}" style="margin-top: 20px;">
       {% csrf_token %}<button type="submit">Abmelden</button>
     </form>
-  </footer>
+  </main>
 </body>
 </html>
