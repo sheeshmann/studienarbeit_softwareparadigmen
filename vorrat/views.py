@@ -4,28 +4,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 
-# DRF (optional)
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-
 from .models import FoodItem, ItemStat
-from .serializers import FoodItemSerializer
 from .forms import FoodItemForm
 from .rl import normalize_name, choose_action_for_stat
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login as auth_login
-
-
-# -------------------------
-# API (optional)
-# -------------------------
-class FoodItemViewSet(viewsets.ModelViewSet):
-    serializer_class = FoodItemSerializer
-    permission_classes = [IsAuthenticated]
-    queryset = FoodItem.objects.none()
-
-    def get_queryset(self):
-        return FoodItem.objects.filter(user=self.request.user).order_by('expiration_date')
 
 
 # -------------------------
